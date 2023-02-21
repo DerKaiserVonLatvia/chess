@@ -1,5 +1,5 @@
 .squarewhite{
-    background-color: bisque;
+    background-color: bisque;   
 }
 
 .squareblack{
@@ -11,6 +11,14 @@
     height: 80px;
 }
 
+.squareblack:hover{
+    background-color: rgb(22, 2, 95);
+}
+
+.squarewhite:hover{
+    background-color: rgb(194, 168, 136);
+}
+
 .chessBoard{
     display: grid;
     grid-template-columns: repeat(8, 80px);
@@ -20,11 +28,13 @@
 .figureImage{
     width: 80px;
     height: 80px;
+}
 
 
-
-
-
+.selectedPiece{
+    position:absolute;
+    transform:translate(-50%,-50%);
+    pointer-events: none;
 
 }
 
@@ -88,4 +98,8 @@
 .wp{
     background-image: url('https://www.chess.com/chess-themes/pieces/neo/150/wp.png');
     background-size: 100%;
+}
+
+.bk .bb .bq .bp .bn .br .wk .wq .wr .wb .wn:hover{
+    background-size: 120%;
 }
