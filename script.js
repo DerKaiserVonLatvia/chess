@@ -1,135 +1,193 @@
-var SELECTED_PIECE="";
-var SELECTED_PIECE_POSITION="";
-var CURRENT_TURN="w";
+var SELECTED_PIECE = "";
+var SELECTED_PIECE_POSITION = "";
+var CURRENT_TURN = "w";
 
-let letters = ["a","b","c","d","e","f","g","h"];
+const letters = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
-function writeChessTiles()
-{
+const blackTags = ["bp", "bk", "bn", "bq", "br", "bb"];
+const whiteTags = ["wp", "wk", "wn", "wq", "wr", "wb"];
+const circle = document.getElementById("selectedPiece");
 
-    letters.forEach(l => {
+circle.style.backgroundSize = "100%";
+circle.style.height = "80px";
+circle.style.width = "80px";
+let tempTag = "";
 
-        for (let i = 1; i<=8; i++)
-        {
+function onClick(id) {
+  let pressedSquare = document.getElementById(id);
+  style = getComputedStyle(pressedSquare);
+  let piece = pressedSquare.className.split(" ")[1];
+  let currentPiece = circle.className.split(" ")[1];
+  if (piece === undefined && currentPiece !== undefined) {
+    pressedSquare.className += " " + currentPiece;
+    circle.className = "selectedPiece";
+  } else if (piece !== undefined && currentPiece == undefined) {
+    circle.className = "selectedPiece " + piece;
 
-            
-let color = "white";
-            if (letters.indexOf(l)%2==0)
-            {
-                if (i%2==0)
-                {
-                    color = "white";
-                }else
-                {
-                    color="black"
-                }
-            }else{
-                if (i%2==0)
-                {
-                    color = "black";
-                }else
-                {
-                    color="white"
-                }
-            }
+    tempTag = id;
 
-            var sq = document.getElementById(l+i);
-            sq.onmousedown = function(){
-                onClick(l ,i);
-            };
+    pressedSquare.className = pressedSquare.className.replace(" " + piece, "");
+  } else if (piece !== undefined && currentPiece !== undefined) {
+    console.log(whiteTags.includes(piece) == whiteTags.includes(piece));
+    if (
+      whiteTags.includes(piece) == whiteTags.includes(currentPiece) ||
+      blackTags.includes(piece) == blackTags.includes(currentPiece)
+    ) {
+      console.log("fa");
+      let returnPieceSquare = document.getElementById(tempTag);
+      returnPieceSquare.className += " " + currentPiece;
+      circle.className = "selectedPiece " + piece;
+      tempTag = id;
+      pressedSquare.className = pressedSquare.className.replace(
+        " " + piece,
+        ""
+      );
+    } else {
+      console.log("af");
 
-            sq.onmouseup = function(){
-                placePiece(l, i);
-            }
-            sq.style.gridColumnStart=letters.indexOf(l)+1;
-            sq.style.gridColumnEnd=letters.indexOf(l)+1;
-            sq.style.gridRowEnd=i;
-            sq.style.gridRowStart=i;
+      circle.className = "selectedPiece";
+      pressedSquare.className = pressedSquare.className.replace(
+        " " + piece,
+        " " + currentPiece
+      );
+    }
+  }
+}
 
+function checkPieceOnField(letter, number) {
+  if (
+    document.getElementById(letter + number).className.split(" ").length > 1
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function canMove(startpos, endpos, piece) {
+  let startNumber = startpos.split("")[1];
+  let startLetter = startpos.split("")[0];
+  let endNumber = endpos.split("")[1];
+  let endLetter = endpos.split("")[0];
+
+  let pieceColor = piece.split("")[0];
+  let pieceType = piece.split("")[1];
+
+  if (pieceColor === "w") {
+    if (pieceType === "p") {
+      if (checkPieceOnField(startLetter, parseInt(startNumber) + 1) === false) {
+        if (
+          startLetter === "2" &&
+          parseInt(endNumber) - parseInt(startNumber) == 2 &&
+          startLetter === endLetter
+        ) {
+          return true; //moved twice on first move
         }
-    });
-}
-
-function onClick(letter, number){
-
-    
-    let circle = document.getElementById('selectedPiece');
-
-
-    let pressedSquare=document.getElementById(letter+number);
-    style = getComputedStyle(pressedSquare);
-    console.log(style)
-    circle.style.backgroundImage=style.backgroundImage;
-    circle.style.backgroundSize='100%';
-    circle.style.height="80px";
-    circle.style.width="80px";
-    console.log(circle.className);
-}
-
-
-function checkPieceOnField(letter, number)
-{
-    if (document.getElementById(letter+number).className.split(" ").length>1)
-    {
-        return true;
-    }
-    else{
-        return false;
-    }
-}
-
-function canMove(startpos, endpos, piece){
-
-
-    let startNumber = startpos.split('')[1]
-    let startLetter = startpos.split('')[0]
-    let endNumber = endpos.split('')[1]
-    let endLetter = endpos.split('')[0]
-
-    let pieceColor = piece.split('')[0];
-    let pieceType = piece.split('')[1];
-
-
-    if (pieceColor==="w")
-    {
-        if (pieceType==="p")
-        {
-            if (checkPieceOnField(startLetter, parseInt(startNumber)+1)===false)
-            {
-                if (startLetter==='2' && parseInt(endNumber)-parseInt(startNumber)==2 && startLetter===endLetter)
-                {
-                    return true//moved twice on first move
-                }
-                if (parseInt(endNumber)-parseInt(startNumber)==1 && startLetter===endLetter)
-                {
-                    return true;//moved once
-                }
-                if (Math.abs(letters.indexOf(endLetter)-letters.indexOf(startLetter))==1 && parseInt(endNumber)-parseInt(startNumber)==1 && checkPieceOnField(endLetter, endNumber))
-                {
-                    return true;
-                }
-            }
-
+        if (
+          parseInt(endNumber) - parseInt(startNumber) == 1 &&
+          startLetter === endLetter
+        ) {
+          return true; //moved once
         }
+        if (
+          Math.abs(letters.indexOf(endLetter) - letters.indexOf(startLetter)) ==
+            1 &&
+          parseInt(endNumber) - parseInt(startNumber) == 1 &&
+          checkPieceOnField(endLetter, endNumber)
+        ) {
+          return true;
+        }
+      }
     }
-
+  }
 }
 
-function placePiece(letter, number){
-    if (SELECTED_PIECE!=="" && SELECTED_PIECE.split('')[0]===CURRENT_TURN && )
-    {
-        let piece = 
-    }else{
+const onMouseMove = (e) => {
+  circle.style.left = e.pageX + "px";
+  circle.style.top = e.pageY + "px";
+};
+document.addEventListener("mousemove", onMouseMove);
 
+function chunkString(str, length) {
+  return str.match(new RegExp(".{1," + length + "}", "g"));
+}
+
+var position = `wrwnwbwqwkwbwnwr|wpwpwpwpwpwpwpwp|________________|________________|________________|________________|bpbpbpbpbpbpbpbp|brbnbbbqbkbbbnbr`;
+
+function fetchPosition() {
+  return position;
+}
+
+function encodeCurrentPosition() {
+  let allSquares = document.querySelectorAll(".squareblack, .squarewhite");
+  let splitOutputByRanks = ["", "", "", "", "", "", "", ""];
+
+  allSquares.forEach((element) => {
+    let piece = element.className.split(" ")[1];
+    let id = element.id;
+    let rank = id.split("")[1];
+
+    splitOutputByRanks[rank - 1] += piece != undefined ? piece : "__";
+  });
+
+  let outputString = "";
+  splitOutputByRanks.forEach((element) => {
+    outputString += element + "|";
+  });
+  outputString[outputString.length - 1] = "";
+  position = outputString;
+  return outputString;
+}
+
+function loadBoard() {
+  const ranks = fetchPosition().split("|");
+  let letternum = 0;
+  let rank = 1;
+  ranks.forEach((element0) => {
+    const pieces = chunkString(element0, 2);
+
+    let file = 0;
+    if (pieces != undefined && pieces.length > 0) {
+      pieces.forEach((pieceTag) => {
+        let tag = letters[file] + rank;
+        let square = document.getElementById(tag);
+        square.onmousedown = function () {
+          onClick(tag);
+        };
+        //console.log(id)
+        if (square) {
+          let index = square.firstChild;
+
+          index.innerHTML = tag;
+        }
+        if (pieceTag != "__") {
+          square.className += " " + pieceTag;
+        }
+        file++;
+      });
     }
+    rank++;
+  });
 }
 
-let circle = document.getElementById('selectedPiece');
-const onMouseMove = (e) =>{
-  circle.style.left = e.pageX + 'px';
-  circle.style.top = e.pageY + 'px';
+function flipBoard() {
+  let allSq = document.querySelectorAll(".squareblack, .squarewhite");
+  // let allWhites = document.querySelectorAll(".squarewhite")
+
+  allSq.forEach((element) => {
+    let letter = element.id.split("")[0];
+    let number = element.id.split("")[1];
+    let letterposition = letters.indexOf(letter);
+    let newLetter = letters[7 - letterposition];
+    let newNum = 9 - number;
+    let newId = newLetter + newNum;
+
+    element.id = newId;
+    let piece = element.className.split(" ");
+    let p = piece.length > 1 ? " " + piece[1] : "";
+    element.className = element.className.replace(p, "");
+  });
+
+  loadBoard();
 }
-document.addEventListener('mousemove', onMouseMove);
-
-
-writeChessTiles();
+loadBoard();
