@@ -8,6 +8,10 @@ const blackTags = ["bp", "bk", "bn", "bq", "br", "bb"];
 const whiteTags = ["wp", "wk", "wn", "wq", "wr", "wb"];
 const circle = document.getElementById("selectedPiece");
 
+
+var positionHistory = new Array();
+var currentStep = 0;
+var viewingStep = 0;
 circle.style.backgroundSize = "100%";
 circle.style.height = "80px";
 circle.style.width = "80px";
@@ -21,6 +25,12 @@ function onClick(id) {
   if (piece === undefined && currentPiece !== undefined) {
     pressedSquare.className += " " + currentPiece;
     circle.className = "selectedPiece";
+    if (tempTag!==pressedSquare.id)
+    {
+      generateNotation(tempTag, currentPiece, pressedSquare.id, piece);
+      encodeCurrentPosition()
+    }
+
   } else if (piece !== undefined && currentPiece == undefined) {
     circle.className = "selectedPiece " + piece;
 
@@ -28,12 +38,10 @@ function onClick(id) {
 
     pressedSquare.className = pressedSquare.className.replace(" " + piece, "");
   } else if (piece !== undefined && currentPiece !== undefined) {
-    console.log(whiteTags.includes(piece) == whiteTags.includes(piece));
     if (
       whiteTags.includes(piece) == whiteTags.includes(currentPiece) ||
       blackTags.includes(piece) == blackTags.includes(currentPiece)
     ) {
-      console.log("fa");
       let returnPieceSquare = document.getElementById(tempTag);
       returnPieceSquare.className += " " + currentPiece;
       circle.className = "selectedPiece " + piece;
@@ -43,13 +51,14 @@ function onClick(id) {
         ""
       );
     } else {
-      console.log("af");
 
       circle.className = "selectedPiece";
       pressedSquare.className = pressedSquare.className.replace(
         " " + piece,
         " " + currentPiece
       );
+      generateNotation(tempTag, currentPiece, pressedSquare.id, piece, true);
+      encodeCurrentPosition();
     }
   }
 }
@@ -118,29 +127,60 @@ function fetchPosition() {
   return position;
 }
 
+
+function generateNotation(pos1, piece, pos2, piece2, takes){
+
+  let delimeter=takes?'-#':'-';
+  const notation= pos1+delimeter+pos2;
+  let html=``;
+
+  if (piece.split('')[0]==='b')
+  {
+     html = `&emsp;<span class="blacktext">${notation}</span><br/>`
+  }else{
+     html = `<span class="whitetext">${notation}</span>`
+  }
+
+  document.getElementById("notationOutput").innerHTML+=html;
+}
+
 function encodeCurrentPosition() {
-  let allSquares = document.querySelectorAll(".squareblack, .squarewhite");
-  let splitOutputByRanks = ["", "", "", "", "", "", "", ""];
+  const allSquares = document.querySelectorAll(".squareblack, .squarewhite");
+  let splitOutputByRanks =[new Array(8),new Array(8),new Array(8),new Array(8),new Array(8),new Array(8),new Array(8),new Array(8)];
 
   allSquares.forEach((element) => {
-    let piece = element.className.split(" ")[1];
-    let id = element.id;
-    let rank = id.split("")[1];
-
-    splitOutputByRanks[rank - 1] += piece != undefined ? piece : "__";
+    const id = element.id;
+    const piece = element.className.split(' ')[1];
+    const letter = id.split('')[0];
+    const number = id.split('')[1];
+    const letterToNum = letters.indexOf(letter);
+    splitOutputByRanks[number-1][letterToNum] = piece!=undefined?piece:"__";
   });
 
   let outputString = "";
   splitOutputByRanks.forEach((element) => {
-    outputString += element + "|";
+    let rowText = element.join('');
+    rowText+="|"
+
+    outputString+=rowText;
   });
   outputString[outputString.length - 1] = "";
-  position = outputString;
+  if (position!=outputString)
+  {
+    console.log("change initiated")
+    console.log(outputString)
+    position = outputString;
+    positionHistory.push(outputString);
+    currentStep++;
+    viewingStep=currentStep;
+  }
+
   return outputString;
 }
 
-function loadBoard() {
-  const ranks = fetchPosition().split("|");
+function loadBoard(position) {
+  console.warn(position)
+  const ranks = position.split("|");
   let letternum = 0;
   let rank = 1;
   ranks.forEach((element0) => {
@@ -162,6 +202,9 @@ function loadBoard() {
         }
         if (pieceTag != "__") {
           square.className += " " + pieceTag;
+        }else
+        {
+          square.className = square.className.split(' ')[0]!=undefined?square.className.split(' ')[0]:square.className;
         }
         file++;
       });
@@ -171,6 +214,9 @@ function loadBoard() {
 }
 
 function flipBoard() {
+
+encodeCurrentPosition();
+
   let allSq = document.querySelectorAll(".squareblack, .squarewhite");
   // let allWhites = document.querySelectorAll(".squarewhite")
 
@@ -188,6 +234,30 @@ function flipBoard() {
     element.className = element.className.replace(p, "");
   });
 
-  loadBoard();
+  loadBoard(position);
 }
-loadBoard();
+loadBoard(position);
+encodeCurrentPosition();
+
+
+
+
+function stepBack(){
+  console.log(viewingStep)
+
+  viewingStep-= viewingStep>0?1:0;
+  console.log(positionHistory)
+  loadBoard(positionHistory[viewingStep]);
+}
+function stepForward(){
+  console.log(viewingStep)
+
+  viewingStep+= viewingStep<currentStep?1:0;
+  console.log(positionHistory)
+  loadBoard(positionHistory[viewingStep]);
+}
+function backToMainPos(){
+  viewingStep=currentStep;
+
+  loadBoard(viewingStep)
+}

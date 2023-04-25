@@ -36,6 +36,44 @@
     transform:translate(-50%,-50%);
     pointer-events: none;
 
+    z-index: 100;
+
+}
+
+.gridContainer{
+position: absolute;
+top:50%;
+left:50%;
+transform: translate(-50%, -50%);
+}
+
+.gameSpace{
+    display: flex;
+    width: 100%;
+}
+.notatationOutput{
+    width: 185px;
+}
+
+.notationTablo{
+    width: 185px;
+    height: 640px;
+    background-color: rgb(0, 47, 75);
+}
+
+
+.blacktext{
+    color: black;
+    font-size: 30px;
+    font-weight: 600;
+}
+
+
+.whitetext{
+    color: white;
+    -webkit-text-stroke: 1px black;
+    font-size: 30px;
+
 }
 
 .bk{
