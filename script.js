@@ -17,6 +17,35 @@ circle.style.height = "80px";
 circle.style.width = "80px";
 let tempTag = "";
 
+var position = "";
+
+console.log("a");
+
+var currentGame = "chess";
+
+
+function switchGame(game) {
+  currentGame = game;
+
+  document.getElementById("notationOutput").innerHTML = "";
+  if (game === "chess") {
+    position = `wrwnwbwqwkwbwnwr|wpwpwpwpwpwpwpwp|________________|________________|________________|________________|bpbpbpbpbpbpbpbp|brbnbbbqbkbbbnbr`;
+
+  } else if (game === "checkers") {
+    position = `wc__wc__wc__wc__|__wc__wc__wc__wc|________________|________________|________________|________________|bc__bc__bc__bc__|__bc__bc__bc__bc`;
+  }
+  console.log("sdkgjfwyrgbakvszbrgogelfjvhakwelfhdkgvwej. f\erfk")
+  loadBoard(position);
+}
+
+
+switchGame("chess");
+
+
+
+
+
+
 function onClick(id) {
   let pressedSquare = document.getElementById(id);
   style = getComputedStyle(pressedSquare);
@@ -25,8 +54,7 @@ function onClick(id) {
   if (piece === undefined && currentPiece !== undefined) {
     pressedSquare.className += " " + currentPiece;
     circle.className = "selectedPiece";
-    if (tempTag!==pressedSquare.id)
-    {
+    if (tempTag !== pressedSquare.id) {
       generateNotation(tempTag, currentPiece, pressedSquare.id, piece);
       encodeCurrentPosition()
     }
@@ -74,42 +102,32 @@ function checkPieceOnField(letter, number) {
 }
 
 function canMove(startpos, endpos, piece) {
-  let startNumber = startpos.split("")[1];
-  let startLetter = startpos.split("")[0];
-  let endNumber = endpos.split("")[1];
-  let endLetter = endpos.split("")[0];
+  if (currentGame == "checkers") {
+    if (Math.abs(startpos[1] - endpos[1]) === 1 && Math.abs((letters.indexOf(startpos[0]) + 1) - (letters.indexOf(endpos[0]) + 1)) === 1) {
+      return { "moves": true, "captures": false, "capturePiece": undefined }
+    };
+  } else if (Math.abs(startpos[1] - endpos[1]) === 2 && Math.abs((letters.indexOf(startpos[0]) + 1) - (letters.indexOf(endpos[0]) + 1)) === 2) {
+    let medianNumber = (startpos[1] + endpos[1]) / 2
 
-  let pieceColor = piece.split("")[0];
-  let pieceType = piece.split("")[1];
 
-  if (pieceColor === "w") {
-    if (pieceType === "p") {
-      if (checkPieceOnField(startLetter, parseInt(startNumber) + 1) === false) {
-        if (
-          startLetter === "2" &&
-          parseInt(endNumber) - parseInt(startNumber) == 2 &&
-          startLetter === endLetter
-        ) {
-          return true; //moved twice on first move
-        }
-        if (
-          parseInt(endNumber) - parseInt(startNumber) == 1 &&
-          startLetter === endLetter
-        ) {
-          return true; //moved once
-        }
-        if (
-          Math.abs(letters.indexOf(endLetter) - letters.indexOf(startLetter)) ==
-            1 &&
-          parseInt(endNumber) - parseInt(startNumber) == 1 &&
-          checkPieceOnField(endLetter, endNumber)
-        ) {
-          return true;
-        }
-      }
+    let startLetternum = letters.indexOf(startpos[0]);
+    let endLetternum = letters.indexOf(endpos[0]);
+    let medianNum = startLetternum + endLetternum / 2;
+    let medianLetter = letters[medianNum];
+
+    let jumpOver = document.getElementById(medianLetter + medianNum);
+    if (jumpOver.split(' ') != undefined) {
+      return { "moves": true, captures: true, "capturePiece": jumpOver.id };
+    } else {
+      return { "moves": false, captures: false, "capturePiece": undefined };
     }
+
+  }else if (currentGame==="chess")
+  {
+    return undefined;
   }
 }
+
 
 const onMouseMove = (e) => {
   circle.style.left = e.pageX + "px";
@@ -121,32 +139,32 @@ function chunkString(str, length) {
   return str.match(new RegExp(".{1," + length + "}", "g"));
 }
 
-var position = `wrwnwbwqwkwbwnwr|wpwpwpwpwpwpwpwp|________________|________________|________________|________________|bpbpbpbpbpbpbpbp|brbnbbbqbkbbbnbr`;
+
+
 
 function fetchPosition() {
   return position;
 }
 
 
-function generateNotation(pos1, piece, pos2, piece2, takes){
+function generateNotation(pos1, piece, pos2, piece2, takes) {
 
-  let delimeter=takes?'-#':'-';
-  const notation= pos1+delimeter+pos2;
-  let html=``;
+  let delimeter = takes ? '-#' : '-';
+  const notation = pos1 + delimeter + pos2;
+  let html = ``;
 
-  if (piece.split('')[0]==='b')
-  {
-     html = `&emsp;<span class="blacktext">${notation}</span><br/>`
-  }else{
-     html = `<span class="whitetext">${notation}</span>`
+  if (piece.split('')[0] === 'b') {
+    html = `&emsp;<span class="blacktext">${notation}</span><br/>`
+  } else {
+    html = `<span class="whitetext">${notation}</span>`
   }
 
-  document.getElementById("notationOutput").innerHTML+=html;
+  document.getElementById("notationOutput").innerHTML += html;
 }
 
 function encodeCurrentPosition() {
   const allSquares = document.querySelectorAll(".squareblack, .squarewhite");
-  let splitOutputByRanks =[new Array(8),new Array(8),new Array(8),new Array(8),new Array(8),new Array(8),new Array(8),new Array(8)];
+  let splitOutputByRanks = [new Array(8), new Array(8), new Array(8), new Array(8), new Array(8), new Array(8), new Array(8), new Array(8)];
 
   allSquares.forEach((element) => {
     const id = element.id;
@@ -154,31 +172,31 @@ function encodeCurrentPosition() {
     const letter = id.split('')[0];
     const number = id.split('')[1];
     const letterToNum = letters.indexOf(letter);
-    splitOutputByRanks[number-1][letterToNum] = piece!=undefined?piece:"__";
+    splitOutputByRanks[number - 1][letterToNum] = piece != undefined ? piece : "__";
   });
 
   let outputString = "";
   splitOutputByRanks.forEach((element) => {
     let rowText = element.join('');
-    rowText+="|"
+    rowText += "|"
 
-    outputString+=rowText;
+    outputString += rowText;
   });
   outputString[outputString.length - 1] = "";
-  if (position!=outputString)
-  {
+  if (position != outputString) {
     console.log("change initiated")
     console.log(outputString)
     position = outputString;
     positionHistory.push(outputString);
     currentStep++;
-    viewingStep=currentStep;
+    viewingStep = currentStep;
   }
 
   return outputString;
 }
 
 function loadBoard(position) {
+  console.log("dskgfasfkuasdfkiasd");
   console.warn(position)
   const ranks = position.split("|");
   let letternum = 0;
@@ -195,16 +213,23 @@ function loadBoard(position) {
           onClick(tag);
         };
         //console.log(id)
+        console.log(pieceTag);
+
         if (square) {
           let index = square.firstChild;
 
           index.innerHTML = tag;
         }
         if (pieceTag != "__") {
-          square.className += " " + pieceTag;
-        }else
-        {
-          square.className = square.className.split(' ')[0]!=undefined?square.className.split(' ')[0]:square.className;
+
+
+          console.log(pieceTag);
+
+          square.className = square.className.split(' ')[1] == undefined ? square.className + " " + pieceTag : square.className.split(' ')[0] + " " + pieceTag;
+
+
+        } else {
+          square.className = square.className.split(' ')[0] != undefined ? square.className.split(' ')[0] : square.className;
         }
         file++;
       });
@@ -215,7 +240,7 @@ function loadBoard(position) {
 
 function flipBoard() {
 
-encodeCurrentPosition();
+  encodeCurrentPosition();
 
   let allSq = document.querySelectorAll(".squareblack, .squarewhite");
   // let allWhites = document.querySelectorAll(".squarewhite")
@@ -236,28 +261,28 @@ encodeCurrentPosition();
 
   loadBoard(position);
 }
-loadBoard(position);
+//loadBoard(position);
 encodeCurrentPosition();
 
 
 
 
-function stepBack(){
+function stepBack() {
   console.log(viewingStep)
 
-  viewingStep-= viewingStep>0?1:0;
+  viewingStep -= viewingStep > 0 ? 1 : 0;
   console.log(positionHistory)
   loadBoard(positionHistory[viewingStep]);
 }
-function stepForward(){
+function stepForward() {
   console.log(viewingStep)
 
-  viewingStep+= viewingStep<currentStep?1:0;
+  viewingStep += viewingStep < currentStep ? 1 : 0;
   console.log(positionHistory)
   loadBoard(positionHistory[viewingStep]);
 }
-function backToMainPos(){
-  viewingStep=currentStep;
+function backToMainPos() {
+  viewingStep = currentStep;
 
   loadBoard(viewingStep)
 }
