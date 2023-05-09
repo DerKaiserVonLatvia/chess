@@ -52,11 +52,15 @@ function onClick(id) {
   let piece = pressedSquare.className.split(" ")[1];
   let currentPiece = circle.className.split(" ")[1];
   if (piece === undefined && currentPiece !== undefined) {
-    pressedSquare.className += " " + currentPiece;
-    circle.className = "selectedPiece";
-    if (tempTag !== pressedSquare.id) {
-      generateNotation(tempTag, currentPiece, pressedSquare.id, piece);
-      encodeCurrentPosition()
+
+    if (canMove(tempTag, id, currentPiece).moves==true){
+      pressedSquare.className += " " + currentPiece;
+      circle.className = "selectedPiece";
+      if (tempTag !== pressedSquare.id) {
+        generateNotation(tempTag, currentPiece, pressedSquare.id, piece);
+        encodeCurrentPosition()
+        return 1;
+      }
     }
 
   } else if (piece !== undefined && currentPiece == undefined) {
@@ -79,14 +83,15 @@ function onClick(id) {
         ""
       );
     } else {
-
-      circle.className = "selectedPiece";
-      pressedSquare.className = pressedSquare.className.replace(
-        " " + piece,
-        " " + currentPiece
-      );
-      generateNotation(tempTag, currentPiece, pressedSquare.id, piece, true);
-      encodeCurrentPosition();
+      if (canMove(tempTag, id, currentPiece).moves==true){
+        circle.className = "selectedPiece";
+        pressedSquare.className = pressedSquare.className.replace(
+          " " + piece,
+          " " + currentPiece
+        );
+        generateNotation(tempTag, currentPiece, pressedSquare.id, piece, true);
+        encodeCurrentPosition();
+      }
     }
   }
 }
@@ -102,29 +107,30 @@ function checkPieceOnField(letter, number) {
 }
 
 function canMove(startpos, endpos, piece) {
+  startpos=startpos.split('');
+  endpos=endpos.split('');
   if (currentGame == "checkers") {
     if (Math.abs(startpos[1] - endpos[1]) === 1 && Math.abs((letters.indexOf(startpos[0]) + 1) - (letters.indexOf(endpos[0]) + 1)) === 1) {
       return { "moves": true, "captures": false, "capturePiece": undefined }
-    };
-  } else if (Math.abs(startpos[1] - endpos[1]) === 2 && Math.abs((letters.indexOf(startpos[0]) + 1) - (letters.indexOf(endpos[0]) + 1)) === 2) {
-    let medianNumber = (startpos[1] + endpos[1]) / 2
-
-
-    let startLetternum = letters.indexOf(startpos[0]);
-    let endLetternum = letters.indexOf(endpos[0]);
-    let medianNum = startLetternum + endLetternum / 2;
-    let medianLetter = letters[medianNum];
-
-    let jumpOver = document.getElementById(medianLetter + medianNum);
-    if (jumpOver.split(' ') != undefined) {
-      return { "moves": true, captures: true, "capturePiece": jumpOver.id };
-    } else {
-      return { "moves": false, captures: false, "capturePiece": undefined };
-    }
-
+    }else if (Math.abs(startpos[1] - endpos[1]) == 2 && Math.abs((letters.indexOf(startpos[0]) + 1) - (letters.indexOf(endpos[0]) + 1)) == 2) {
+      let medianNumber = (startpos[1] + endpos[1]) / 2
+  
+      console.log(startpos)
+      let startLetternum = letters.indexOf(startpos[0])+1;
+      let endLetternum = letters.indexOf(endpos[0])+1;
+      let medianNum = startLetternum + endLetternum / 2;
+      let medianLetter = letters[medianNum];
+      let jumpOver = document.getElementById(medianLetter + medianNumber);
+      console.log(jumpOver)
+      if (jumpOver.className.split(' ')[1] != undefined) {
+        return { "moves": true, captures: true, "capturePiece": jumpOver.id };
+      } else {
+        return { "moves": false, captures: false, "capturePiece": undefined };
+      }
+  } 
   }else if (currentGame==="chess")
   {
-    return undefined;
+    return { "moves": false, captures: false, "capturePiece": undefined };
   }
 }
 
