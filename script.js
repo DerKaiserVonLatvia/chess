@@ -86,6 +86,7 @@ function onClick(id) {
         ""
       );
     } else {
+      const cm = canMove(tempTag, id, currentPiece);
       if (cm.moves==true){
         if (cm.captures==true)
         {
@@ -114,6 +115,43 @@ function checkPieceOnField(letter, number) {
   }
 }
 
+
+
+function canRunThroughRows(startpos, endpos){
+  startpos = startpos.split(',');
+  endpos = endpos.split(',');
+  const startNum = parseInt(startpos[1]);
+  const startLet = letters.indexOf(startpos[0]);
+  const endNum = parseInt(endpos[1]);
+  const endLet = letters.indexOf(endpos[0]);
+
+
+  let deltaNum = endNum < startNum ? -1 : endNum==startNum ? 0 : 1 ; // if the end number is smaller, we loop backwards, from largest to smallest; else 0
+  let deltaLetter = endLet < startLet ? -1 : endLet==startLet ? 0 : 1; // if the end letter [index-1] is smaller, we loop backwards, from largest to smallest; else 0
+  console.log(deltaNum)
+  let n = startNum;
+  let l = startLet;//temporary to keep track of them
+  console.log(endLet,endNum)
+  console.log(n, l)
+  while (endLet!=startLet-1 && startNum!==endNum){
+    n+=deltaNum;
+    l+=deltaLetter;
+    console.log(l, n)
+    if (l==endLet && n==endNum)
+    {
+      break;
+    }
+    console.log(letters[l]+n.toString(10));
+    if (document.getElementById(letters[l]+n.toString(10)).className.split(' ')[1]!=undefined)
+    {
+      console.log(document.getElementById(letters[l]+n.toString(10)))
+      return false;
+    }
+  }
+  return true
+}
+
+
 function canMove(startpos, endpos, piece) {
   startpos=startpos.split('');
   endpos=endpos.split('');
@@ -136,44 +174,124 @@ function canMove(startpos, endpos, piece) {
         return { "moves": false, captures: false, "capturePiece": undefined };
       }
   } 
+
+
   }else if (currentGame==="chess")
   {
-
-
-
- 
-
     const pieceType = piece.split('')[1];
     const pieceColor = piece.split('')[0];
+
+    const startnumber = parseInt(startpos[1]);
+    const startletter = startpos[0];
+
+    const endnumber = parseInt(endpos[1]);
+    const endletter = endpos[0];
     switch(pieceType)
     {
-      case "p": 
-      const startnumber = parseInt(startpos[1]);
-      const startletter = startpos[0];
-
-      const endnumber = parseInt(endpos[1]);
-      const endletter = endpos[0];
+      case "p":
         switch(pieceColor)
         {
           case "b":
-            if (startletter==endletter && endnumber==startnumber-1)
+            var pieceInFront = document.getElementById(startletter+(startnumber-1).toString(10)).className.split(' ')[1];
+            if (startletter==endletter && endnumber==startnumber-1 && pieceInFront==undefined || startletter==endletter && endnumber==startnumber-2 && startnumber==7 && canRunThroughRows(startpos.join(), endpos.join())==true)
             {
+              console.log("capture")
+
               return {"moves": true, "captures":false}
+            } else if (Math.abs((letters.indexOf(endletter)+1)-(letters.indexOf(startletter)+1))==1 && startnumber==endnumber+1)
+            {
+              let capturePiece=document.getElementById(endletter+endnumber.toString(10)).className.split(' ')[1];
+              console.log(capturePiece);
+              if(capturePiece!=undefined)
+              {
+                return {"moves": true, "captures":true, "captures": capturePiece};
+              }else
+              {
+                return {"moves": false, "captures":false}
+              }
             }
             return {"moves": false, "captures":false}
           case "w":
-            if (startletter==endletter && endnumber==startnumber+1)
+            var pieceInFront = document.getElementById(startletter+(startnumber+1).toString(10)).className.split(' ')[1];
+            console.log(pieceInFront)
+            if (startletter==endletter && endnumber==startnumber+1 && pieceInFront==undefined || startletter==endletter && endnumber==startnumber+2 && startnumber==2 && canRunThroughRows(startpos.join(), endpos.join())==true)
             {
+              console.log("capture")
+
               return {"moves": true, "captures":false}
-            }
-            return {"moves": false, "captures":false}
-        }
+            } else if (Math.abs((letters.indexOf(endletter)+1)-(letters.indexOf(startletter)+1))==1 && startnumber==endnumber-1)
+            {
+              let capturePiece=document.getElementById(endletter+endnumber.toString(10)).className.split(' ')[1];
+              console.log(capturePiece);
+              if(capturePiece!=undefined)
+              {
+                console.log("capture")
+                return {"moves": true, "captures":true, "captures": capturePiece};
+              }else
+              {
+                return {"moves": false, "captures":false}
+              }
+        }}
+        return {"moves": false, "captures":false}
+
 
       case "k":
+        if (Math.abs(startnumber-endnumber)==1 || Math.abs(letters.indexOf(startletter)-letters.indexOf(endletter))==1)
+        {
+          return {"moves": true};
+        }
       case "n":
+        console.log(startnumber)
+        if (Math.abs(startnumber-endnumber)==1 && Math.abs(letters.indexOf(startletter)-letters.indexOf(endletter))==2
+        ||
+        Math.abs(letters.indexOf(startletter)-letters.indexOf(endletter))==1 && Math.abs(startnumber-endnumber)==2)
+        {
+          return {"moves": true};
+        }else
+        {
+          return {"moves": false};
+        }
       case "b":
-      case "r": 
+        if (Math.abs(startnumber-endnumber)==Math.abs(letters.indexOf(startletter)-letters.indexOf(endletter)))
+        {
+          if (canRunThroughRows(startpos.join(), endpos.join())==true)
+          {
+            return {"moves":true}
+          }
+        }
+        return {"moves":false}
+
+      case "r":
+
+
+
+        if (startnumber==endnumber || startletter==endletter)
+        {
+          if (canRunThroughRows(startpos.join(), endpos.join())==true)
+          {
+            return {"moves":true}
+          }
+        }
+        return {"moves":false}
+
+
+
       case "q":
+        if (startnumber==endnumber || startletter==endletter)
+        {
+          if (canRunThroughRows(startpos.join(), endpos.join())==true)
+          {
+            return {"moves":true}
+          }
+        }
+        if (Math.abs(startnumber-endnumber)==Math.abs(letters.indexOf(startletter)-letters.indexOf(endletter)))
+        {
+          if (canRunThroughRows(startpos.join(), endpos.join())==true)
+          {
+            return {"moves":true}
+          }
+        }
+        return {"moves":false}
 
     }
 
@@ -244,8 +362,6 @@ function encodeCurrentPosition() {
   });
   outputString[outputString.length - 1] = "";
   if (position != outputString) {
-    console.log("change initiated")
-    console.log(outputString)
     position = outputString;
     positionHistory.push(outputString);
     currentStep++;
@@ -256,7 +372,6 @@ function encodeCurrentPosition() {
 }
 
 function loadBoard(position) {
-  console.log("dskgfasfkuasdfkiasd");
   console.warn(position)
   const ranks = position.split("|");
   let letternum = 0;
