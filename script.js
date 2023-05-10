@@ -15,7 +15,7 @@ var viewingStep = 0;
 circle.style.backgroundSize = "100%";
 circle.style.height = "80px";
 circle.style.width = "80px";
-let tempTag = "";
+let tempTag = ""
 
 var position = "";
 
@@ -42,18 +42,21 @@ function switchGame(game) {
 switchGame("chess");
 
 
-
-
-
-
 function onClick(id) {
   let pressedSquare = document.getElementById(id);
   style = getComputedStyle(pressedSquare);
   let piece = pressedSquare.className.split(" ")[1];
   let currentPiece = circle.className.split(" ")[1];
   if (piece === undefined && currentPiece !== undefined) {
-
-    if (canMove(tempTag, id, currentPiece).moves==true){
+      const cm = canMove(tempTag, id, currentPiece);
+    console.log(cm)
+    if (cm.moves==true){
+      if (cm.captures==true)
+      {
+        let pieceToCaptureSq = document.getElementById(cm.capturePiece);
+        pieceToCaptureSq.className=pieceToCaptureSq.className.split(' ')[0];
+      }
+      console.log("we")
       pressedSquare.className += " " + currentPiece;
       circle.className = "selectedPiece";
       if (tempTag !== pressedSquare.id) {
@@ -83,7 +86,12 @@ function onClick(id) {
         ""
       );
     } else {
-      if (canMove(tempTag, id, currentPiece).moves==true){
+      if (cm.moves==true){
+        if (cm.captures==true)
+        {
+          let pieceToCaptureSq = document.getElementById(cm.capturePiece);
+          pieceToCaptureSq.className=pieceToCaptureSq.className.split(' ')[0];
+        }
         circle.className = "selectedPiece";
         pressedSquare.className = pressedSquare.className.replace(
           " " + piece,
@@ -113,16 +121,16 @@ function canMove(startpos, endpos, piece) {
     if (Math.abs(startpos[1] - endpos[1]) === 1 && Math.abs((letters.indexOf(startpos[0]) + 1) - (letters.indexOf(endpos[0]) + 1)) === 1) {
       return { "moves": true, "captures": false, "capturePiece": undefined }
     }else if (Math.abs(startpos[1] - endpos[1]) == 2 && Math.abs((letters.indexOf(startpos[0]) + 1) - (letters.indexOf(endpos[0]) + 1)) == 2) {
-      let medianNumber = (startpos[1] + endpos[1]) / 2
-  
-      console.log(startpos)
-      let startLetternum = letters.indexOf(startpos[0])+1;
-      let endLetternum = letters.indexOf(endpos[0])+1;
-      let medianNum = startLetternum + endLetternum / 2;
-      let medianLetter = letters[medianNum];
+      let medianNumber = (parseInt(startpos[1]) + parseInt(endpos[1])) / 2
+      
+      console.log(medianNumber)
+      let medianNum = (parseInt(letters.indexOf(startpos[0])+1) + parseInt(letters.indexOf(endpos[0])+1)) / 2;
+      let medianLetter = letters[medianNum-1];
+      console.log(medianLetter);
       let jumpOver = document.getElementById(medianLetter + medianNumber);
       console.log(jumpOver)
-      if (jumpOver.className.split(' ')[1] != undefined) {
+      if (jumpOver.className.split(' ')[1] != undefined && jumpOver.className.split(' ')[1]!=piece) {
+        console.warn("jumping over piece")
         return { "moves": true, captures: true, "capturePiece": jumpOver.id };
       } else {
         return { "moves": false, captures: false, "capturePiece": undefined };
@@ -130,6 +138,52 @@ function canMove(startpos, endpos, piece) {
   } 
   }else if (currentGame==="chess")
   {
+
+
+
+ 
+
+    const pieceType = piece.split('')[1];
+    const pieceColor = piece.split('')[0];
+    switch(pieceType)
+    {
+      case "p": 
+      const startnumber = parseInt(startpos[1]);
+      const startletter = startpos[0];
+
+      const endnumber = parseInt(endpos[1]);
+      const endletter = endpos[0];
+        switch(pieceColor)
+        {
+          case "b":
+            if (startletter==endletter && endnumber==startnumber-1)
+            {
+              return {"moves": true, "captures":false}
+            }
+            return {"moves": false, "captures":false}
+          case "w":
+            if (startletter==endletter && endnumber==startnumber+1)
+            {
+              return {"moves": true, "captures":false}
+            }
+            return {"moves": false, "captures":false}
+        }
+
+      case "k":
+      case "n":
+      case "b":
+      case "r": 
+      case "q":
+
+    }
+
+
+
+
+
+
+
+
     return { "moves": false, captures: false, "capturePiece": undefined };
   }
 }
@@ -219,7 +273,6 @@ function loadBoard(position) {
           onClick(tag);
         };
         //console.log(id)
-        console.log(pieceTag);
 
         if (square) {
           let index = square.firstChild;
@@ -227,13 +280,8 @@ function loadBoard(position) {
           index.innerHTML = tag;
         }
         if (pieceTag != "__") {
-
-
-          console.log(pieceTag);
-
           square.className = square.className.split(' ')[1] == undefined ? square.className + " " + pieceTag : square.className.split(' ')[0] + " " + pieceTag;
-
-
+        
         } else {
           square.className = square.className.split(' ')[0] != undefined ? square.className.split(' ')[0] : square.className;
         }
