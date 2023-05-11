@@ -8,6 +8,7 @@ const blackTags = ["bp", "bk", "bn", "bq", "br", "bb"];
 const whiteTags = ["wp", "wk", "wn", "wq", "wr", "wb"];
 const circle = document.getElementById("selectedPiece");
 
+var [a1m, h1m, a8m, h8m, wkm, bkm] = [false,false,false,false,false,false];
 
 var positionHistory = new Array();
 var currentStep = 0;
@@ -125,26 +126,17 @@ function canRunThroughRows(startpos, endpos){
   const endNum = parseInt(endpos[1]);
   const endLet = letters.indexOf(endpos[0]);
 
-
   let deltaNum = endNum < startNum ? -1 : endNum==startNum ? 0 : 1 ; // if the end number is smaller, we loop backwards, from largest to smallest; else 0
   let deltaLetter = endLet < startLet ? -1 : endLet==startLet ? 0 : 1; // if the end letter [index-1] is smaller, we loop backwards, from largest to smallest; else 0
-  console.log(deltaNum)
+  let l = startLet;
   let n = startNum;
-  let l = startLet;//temporary to keep track of them
-  console.log(endLet,endNum)
-  console.log(n, l)
-  while (endLet!=startLet-1 && startNum!==endNum){
-    n+=deltaNum;
+  while(l!==endLet || n!==endNum)
+  {
     l+=deltaLetter;
-    console.log(l, n)
-    if (l==endLet && n==endNum)
+    n+=deltaNum;
+    const cell = document.getElementById(letters[l]+n.toString(10));
+    if (cell.className.split(' ')[1]!=undefined && l!==endLet && n!==endNum)
     {
-      break;
-    }
-    console.log(letters[l]+n.toString(10));
-    if (document.getElementById(letters[l]+n.toString(10)).className.split(' ')[1]!=undefined)
-    {
-      console.log(document.getElementById(letters[l]+n.toString(10)))
       return false;
     }
   }
@@ -238,7 +230,55 @@ function canMove(startpos, endpos, piece) {
       case "k":
         if (Math.abs(startnumber-endnumber)==1 || Math.abs(letters.indexOf(startletter)-letters.indexOf(endletter))==1)
         {
+          pieceColor=='b'?bkm=true:wkm=true;
           return {"moves": true};
+        }
+        
+        if (!wkm && pieceColor=='w' && canRunThroughRows(startpos.join(), endpos.join()))
+        {
+          switch((endletter+endnumber.toString(10)))
+          {
+            case "g1":
+              if (!h1m)
+              {
+                h1m=true;
+                wkm=true;
+                document.getElementById("h1").className=document.getElementById("h1").className.split(' ')[0];
+                document.getElementById("f1").className+=" wr";
+                return {"moves":true};
+              }
+            case "c1":
+              if (!a1m){
+                a1m=true;
+                whm=true;
+                document.getElementById("a1").className=document.getElementById("a1").className.split(' ')[0];
+                document.getElementById("d1").className+=" wr";
+                return {"moves":true};
+              }
+          }
+        }else if(pieceColor=='b' && !bkm && canRunThroughRows(startpos.join(), endpos.join()))
+        {
+          switch((endletter+endnumber.toString(10)))
+          {
+            case "g8":
+              if (!h8m)
+              {
+                h8m=true;
+                bkm=true;
+                document.getElementById("h8").className=document.getElementById("h8").className.split(' ')[0];
+                document.getElementById("f8").className+=" br";
+                return {"moves":true};
+              }
+            case "c8":
+              if (!a8m)
+              {
+                a8m=true;
+                bkm=true;
+                document.getElementById("a8").className=document.getElementById("a8").className.split(' ')[0];
+                document.getElementById("f8").className+=" br";
+                return {"moves":true};
+              }
+          }
         }
       case "n":
         console.log(startnumber)
@@ -262,20 +302,20 @@ function canMove(startpos, endpos, piece) {
         return {"moves":false}
 
       case "r":
-
-
-
         if (startnumber==endnumber || startletter==endletter)
         {
+          if (startnumber!==endnumber || endletter!==startletter)
+          {
+            console.log("actually moved")
+            pieceColor=='b'?startletter=='h'&&startnumber==8&&pieceColor=='b'?h8m=true:startletter=='a'&&startnumber==8&&pieceColor=='b'?a1m=true:a1m=false:startletter=='h'&&startnumber==1?h1m=true:startletter=='a'&&startnumber==1?a1m=true:a1m=false;
+            console.log(a1m, h1m, a8m, h8m, wkm, bkm)
+          }
           if (canRunThroughRows(startpos.join(), endpos.join())==true)
           {
             return {"moves":true}
           }
         }
         return {"moves":false}
-
-
-
       case "q":
         if (startnumber==endnumber || startletter==endletter)
         {
@@ -294,14 +334,6 @@ function canMove(startpos, endpos, piece) {
         return {"moves":false}
 
     }
-
-
-
-
-
-
-
-
     return { "moves": false, captures: false, "capturePiece": undefined };
   }
 }
