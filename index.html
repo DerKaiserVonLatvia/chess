@@ -14,7 +14,38 @@
 
         <div class="gridContainer">
             <div class="gameSpace">
-                <div class="chessBoard">
+
+                <div class="tictactoe" id="ttt">
+                    <div class="tttCell" id="ttt1">
+
+                    </div>
+                    <div class="tttCell" id="ttt2">
+                        
+                    </div>
+                    <div class="tttCell" id="ttt3">
+                        
+                    </div>
+                    <div class="tttCell" id="ttt4">
+                        
+                    </div>
+                    <div class="tttCell" id="ttt5">
+                        
+                    </div>
+                    <div class="tttCell" id="ttt6">
+                        
+                    </div>
+                    <div class="tttCell" id="ttt7">
+                        
+                    </div>
+                    <div class="tttCell" id="ttt8">
+                        
+                    </div>
+                    <div class="tttCell" id="ttt9">
+                        
+                    </div>
+                </div>
+
+                <div id="chessboard" class="chessBoard">
                     <div class="squarewhite" id="a8"><span id="index" class="index"></span></div>
                     <div class="squareblack" id="b8"><span id="index" class="index"></span></div>
                     <div class="squarewhite" id="c8"><span id="index" class="index"></span></div>
@@ -90,7 +121,7 @@
              </div>
     
     
-             <div class="notationTablo">
+             <div id="tabloNotation" class="notationTablo">
                 <span id="notationOutput">
 
                 </span>
@@ -109,8 +140,9 @@
         <button onclick="switchGame('chess')">CHESS</button>
         <button onclick="switchGame('checkers')">CHECKERS</button>
 
+        <button onclick="switchBoards('tictactoe')">TTT</button>
 
         <script src="script.js"></script>
-
+        <script src="switchBoards.js"></script>
     </body>
 </html>
