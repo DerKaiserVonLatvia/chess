@@ -8,6 +8,8 @@ const blackTags = ["bp", "bk", "bn", "bq", "br", "bb"];
 const whiteTags = ["wp", "wk", "wn", "wq", "wr", "wb"];
 const circle = document.getElementById("selectedPiece");
 
+var currentMove = 'w';
+
 var [a1m, h1m, a8m, h8m, wkm, bkm] = [false,false,false,false,false,false];
 
 var positionHistory = new Array();
@@ -117,28 +119,66 @@ function checkPieceOnField(letter, number) {
 }
 
 
+function checkForChecks(piece, square){
+    if (piece==='bk')
+    {
+      const whitePieces = document.querySelectorAll(".wp .wb .wn .wk .wr .wq")
 
-function canRunThroughRows(startpos, endpos){
+      whitePieces.forEach(element => {
+        let id = element.id;
+        let p = element.className.split(" ")[1];
+        if (piece=='')
+        if (canRunThroughRows(id, square, piece)==true)
+        {
+          return true;s
+        }
+      });
+    }
+}
+
+
+function canRunThroughRows(startpos, endpos, piece){
   startpos = startpos.split(',');
   endpos = endpos.split(',');
   const startNum = parseInt(startpos[1]);
-  const startLet = letters.indexOf(startpos[0]);
+  const startLet = letters.indexOf(startpos[0])+1;
   const endNum = parseInt(endpos[1]);
-  const endLet = letters.indexOf(endpos[0]);
+  const endLet = letters.indexOf(endpos[0])+1;
+
+
+
+  if (piece=='b' || piece=='q'){
+    if( Math.abs(endNum-startNum) != Math.abs(startLet-endLet)){
+      return false;
+    }
+  }
+  if (piece=='r' || piece=='q'){
+    if(startLet!==endLet && startNum!==endNum){
+      return false;
+    }
+  }
 
   let deltaNum = endNum < startNum ? -1 : endNum==startNum ? 0 : 1 ; // if the end number is smaller, we loop backwards, from largest to smallest; else 0
   let deltaLetter = endLet < startLet ? -1 : endLet==startLet ? 0 : 1; // if the end letter [index-1] is smaller, we loop backwards, from largest to smallest; else 0
   let l = startLet;
   let n = startNum;
-  while(l!==endLet || n!==endNum)
+
+  console.warn(l!=endLet)
+
+  while (1)
   {
-    l+=deltaLetter;
-    n+=deltaNum;
-    const cell = document.getElementById(letters[l]+n.toString(10));
-    if (cell.className.split(' ')[1]!=undefined && l!==endLet && n!==endNum)
+    if (l==endLet && n==endNum)
+    {
+      break;
+    }
+    const cell = document.getElementById(letters[l-1]+n.toString(10));
+    console.log(document.getElementById(letters[l-1]+n.toString(10)));
+    if (cell.className.split(' ')[1]!=undefined)
     {
       return false;
     }
+    l+=deltaLetter;
+    n+=deltaNum;
   }
   return true
 }
